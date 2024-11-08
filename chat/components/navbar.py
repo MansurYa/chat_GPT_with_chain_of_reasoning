@@ -82,7 +82,7 @@ def navbar():
         rx.hstack(
             rx.hstack(
                 rx.avatar(fallback="RC", variant="solid"),
-                rx.heading("Reflex Chat"),
+                rx.heading("Chat GPT with chain of reasoning"),
                 rx.desktop_only(
                     rx.badge(
                     State.current_chat,
