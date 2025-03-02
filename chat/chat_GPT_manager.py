@@ -5,6 +5,7 @@ import random
 import os
 import copy
 import base64
+from pydantic import BaseModel
 
 
 class MessageContext:
@@ -441,7 +442,7 @@ f```
         # Вызываем API с временным контекстом
         return self.__call_openai_api(trimmed_messages)
 
-    def __call_openai_api(self, messages: list) -> str or None:
+    def __call_openai_api(self, messages: list, response_format: ) -> str or None:
         """
         Вызывает OpenAI API для обработки текста и возвращает ответ.
 
