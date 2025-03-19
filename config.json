@@ -1,0 +1,9 @@
+{
+    "api_key": "",
+    "organization": "",
+    "model_name": "gpt-4o",
+    "temperature": 0.0,
+    "max_response_tokens": 4095,
+    "max_total_tokens": 30000,
+    "analysis_depth": 5
+}
