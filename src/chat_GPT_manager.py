@@ -1,12 +1,16 @@
-from openai import OpenAI
+from openai import OpenAI, RateLimitError, APITimeoutError, APIError
 import tiktoken
-import time
-import random
 import os
 import copy
 import base64
 from typing import Optional, Union, Type
 from pydantic import BaseModel
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+    retry_if_exception_type
+)
 
 
 class MessageContext:
@@ -460,6 +464,10 @@ f```
         # Вызываем API с временным контекстом
         return self.__call_openai_api(trimmed_messages, response_format)
 
+    @retry(wait=wait_random_exponential(min=1, max=3600),
+           stop=stop_after_attempt(10),
+           retry=retry_if_exception_type((RateLimitError, APITimeoutError)),
+    )
     def __call_openai_api(self, messages: list, response_format: Optional[Type[BaseModel]] = None) -> Union[str, BaseModel, None]:
         """
         Вызывает OpenAI API с поддержкой структурированных ответов.
@@ -468,44 +476,37 @@ f```
         :param response_format: Pydantic модель для парсинга ответа
         :return: Ответ в виде строки, Pydantic модели или None при ошибках
         """
-        count_of_attempts = 0
-        max_attempts = 10
+        try:
+            if response_format:
+                response = self.client.beta.chat.completions.parse(
+                    model=self.model_name,
+                    messages=messages,
+                    max_tokens=self.max_response_tokens,
+                    temperature=self.temperature,
+                    response_format=response_format,
+                )
 
-        while count_of_attempts < max_attempts:
-            try:
-                if response_format is None:
-                    response = self.client.chat.completions.create(
-                        model=self.model_name,
-                        messages=messages,
-                        max_tokens=self.max_response_tokens,
-                        temperature=self.temperature,
-                    )
-                    return response.choices[0].message.content
-                else:
-                    response = self.client.beta.chat.completions.parse(
-                        model=self.model_name,
-                        messages=messages,
-                        max_tokens=self.max_response_tokens,
-                        temperature=self.temperature,
-                        response_format=response_format,
-                    )
+                if response.choices[0].message.refusal:
+                    print(f"Отказ модели: {response.choices[0].message.refusal}")
+                    return None
 
-                    if response.choices[0].message.refusal:
-                        print(f"Отказ модели: {response.choices[0].message.refusal}")
-                        return None
+                return response.choices[0].message.parsed
+            else:
+                response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    max_tokens=self.max_response_tokens,
+                    temperature=self.temperature,
+                )
 
-                    return response.choices[0].message.parsed
+                return response.choices[0].message.content
 
-            except Exception as e:
-                print(f"Ошибка API: {e}")
-                count_of_attempts += 1
-                if count_of_attempts < max_attempts:
-                    delay = random.randint(1, 10) * count_of_attempts
-                    print(f"Повтор через {delay} сек...")
-                    time.sleep(delay)
-
-        print("Не удалось получить ответ от API после 10 попыток.")
-        return None
+        except APIError as e:
+            print(f"Ошибка API: {e}")
+            raise
+        except Exception as e:
+            print(f"Непредвиденная ошибка: {e}")
+            return None
 
     def __count_tokens_for_single_message(self, message) -> int:
         """
