@@ -50,7 +50,7 @@ agent = ChatGPTAgent(
     task_prompt="You are an advanced ChatGPT with chain of reasoning.",
     max_total_tokens=MAX_TOTAL_TOKENS,           
     max_response_tokens=MAX_RESPONSE_TOKENS,     
-    temperature=TEMPRATURE                       
+    temperature=TEMPERATURE                       
 )
 
 # Выполняем запрос с пошаговым рассуждением
