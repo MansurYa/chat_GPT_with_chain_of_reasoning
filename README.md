@@ -31,7 +31,7 @@ import json
 from src.chat_GPT_manager import ChatGPTAgent
 
 with open("../config.json", "r") as file:
-   config = json.load(file)
+    config = json.load(file)
 
 API_KEY = config["api_key"]
 ORGANIZATION = config["organization"]
