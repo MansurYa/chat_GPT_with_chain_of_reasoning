@@ -29,28 +29,30 @@
 ```python
 from src.chat_GPT_manager import ChatGPTAgent
 
-# Предположим, вы уже заполнили config.json или определили нужные переменные
-api_key = "ВАШ_OPENAI_API_KEY"  # заменить своими данными
-organization = "ВАША_ORG_ID"    # заменить своими данными
-model_name = "gpt-4o"            # пример: "gpt-4" или ваша модель
-analysis_depth = 5              # глубина пошагового анализа
+API_KEY = config["api_key"]
+ORGANIZATION = config["organization"]
+TEMPRATURE = config.get("temperature", 0.0)
+MAX_RESPONSE_TOKENS = config.get("max_response_tokens", 4096)  
+MAX_TOTAL_TOKENS = config.get("max_total_tokens", 30000)
+MODEL_NAME = config.get("model_name", "gpt-4o")
+ANALYSIS_DEPTH = config.get("analysis_depth", 5)
 
 # Инициализируем агента:
 agent = ChatGPTAgent(
-    api_key=api_key,
-    organization=organization,
-    model_name=model_name,
+    api_key=API_KEY,
+    organization=ORGANIZATION,
+    model_name=MODEL_NAME,
     mode=2,
     task_prompt="You are an advanced ChatGPT with chain of reasoning.",
-    max_total_tokens=30000,       # пример значения
-    max_response_tokens=4095,     # пример значения
-    temperature=0.0               # пример значения
+    max_total_tokens=MAX_TOTAL_TOKENS,           
+    max_response_tokens=MAX_RESPONSE_TOKENS,     
+    temperature=TEMPRATURE                       
 )
 
 # Выполняем запрос с пошаговым рассуждением
 user_prompt = "Помоги мне составить подробный план изучения Data Science."
 response = agent.response_from_chat_GPT_with_chain_of_reasoning(
-    analysis_depth=analysis_depth,
+    analysis_depth=ANALYSIS_DEPTH,
     user_message=user_prompt,
     images=[],
     preserve_user_messages_post_analysis=True
