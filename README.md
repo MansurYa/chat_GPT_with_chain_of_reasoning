@@ -35,7 +35,7 @@ with open("../config.json", "r") as file:
 
 API_KEY = config["api_key"]
 ORGANIZATION = config["organization"]
-TEMPRATURE = config.get("temperature", 0.0)
+TEMPERATURE = config.get("temperature", 0.0)
 MAX_RESPONSE_TOKENS = config.get("max_response_tokens", 4096)  
 MAX_TOTAL_TOKENS = config.get("max_total_tokens", 30000)
 MODEL_NAME = config.get("model_name", "gpt-4o")
