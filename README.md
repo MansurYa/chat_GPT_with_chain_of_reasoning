@@ -1,4 +1,4 @@
-# Chat LLM with Hierarchical Recursive Decomposition Framework (HRD)
+# Chat LLM with Hierarchical Recursive Decomposition (HRD)
 
 Фреймворк для решения сложных задач с использованием больших языковых моделей (LLM) через автоматическую декомпозицию на подзадачи, рекурсивное решение и проверку качества на каждом этапе.
 
