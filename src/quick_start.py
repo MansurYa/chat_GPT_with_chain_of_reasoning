@@ -49,7 +49,7 @@ response = agent_IoT.response_from_LLM(
     images=[],
 )
 
-print("Ответ бота БЕЗ рекурсивной декомпозиции:")
+print("Ответ бота БЕЗ иерархической рекурсивной декомпозиции:")
 print(response)
 
 
@@ -63,5 +63,5 @@ response = agent_HRD.response_from_LLM_with_hierarchical_recursive_decomposition
     debug_reasoning_print=True
 )
 
-print("Ответ бота С рекурсивной декомпозицией:")
+print("Ответ бота С иерархической рекурсивной декомпозицией:")
 print(response)
