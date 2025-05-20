@@ -27,13 +27,13 @@
 Ниже пример кода, где создаётся агент, а затем вызывается метод с цепочкой рассуждений:
 
 ```python
-from src.chat_GPT_manager import ChatGPTAgent
+from src.LLM_manager import ChatGPTAgent
 
 # Предположим, вы уже заполнили config.json или определили нужные переменные
 api_key = "ВАШ_OPENAI_API_KEY"  # заменить своими данными
-organization = "ВАША_ORG_ID"    # заменить своими данными
-model_name = "gpt-4o"            # пример: "gpt-4" или ваша модель
-analysis_depth = 5              # глубина пошагового анализа
+organization = "ВАША_ORG_ID"  # заменить своими данными
+model_name = "gpt-4o"  # пример: "gpt-4" или ваша модель
+analysis_depth = 5  # глубина пошагового анализа
 
 # Инициализируем агента:
 agent = ChatGPTAgent(
@@ -42,9 +42,9 @@ agent = ChatGPTAgent(
     model_name=model_name,
     mode=2,
     task_prompt="You are an advanced ChatGPT with chain of reasoning.",
-    max_total_tokens=30000,       # пример значения
-    max_response_tokens=4095,     # пример значения
-    temperature=0.0               # пример значения
+    max_total_tokens=30000,  # пример значения
+    max_response_tokens=4095,  # пример значения
+    temperature=0.0  # пример значения
 )
 
 # Выполняем запрос с пошаговым рассуждением

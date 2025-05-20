@@ -1,9 +1,13 @@
 {
-    "api_key": "",
-    "organization": "",
-    "model_name": "gpt-4o",
+    "openai_api_key": "",
+    "openai_organization": "",
+    "openrouter_api_key": "",
+    "model_name": "deepseek/deepseek-chat-v3-0324",
+    "larger_model_name": "deepseek/deepseek-r1",
     "temperature": 0.0,
     "max_response_tokens": 4095,
-    "max_total_tokens": 30000,
-    "analysis_depth": 5
+    "max_total_tokens": 120000,
+    "analysis_depth": 5,
+    "max_llm_calling_count": 100,
+    "use_openai_or_openrouter": "openrouter"
 }

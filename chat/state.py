@@ -1,7 +1,7 @@
 import os
 import json
 import reflex as rx
-from src.chat_GPT_manager import ChatGPTAgent
+from src.LLM_manager import ChatGPTAgent
 
 
 class QA(rx.Base):
@@ -142,7 +142,8 @@ If they do not ask otherwise, then give answers using MarkDown markup.
 
         # response = agent.response_from_chat_GPT_with_chain_of_reasoning(analysis_depth=self.config["analysis_depth"], user_message=question, images=[], preserve_user_messages_post_analysis=True)
         # Replaced it so that the 'analysis_depth' could be changed right during operation
-        response = agent.response_from_chat_GPT_with_chain_of_reasoning(analysis_depth=load_config()["analysis_depth"], user_message=question, images=[], preserve_user_messages_post_analysis=True, debug_reasoning_print=True)
+        response = agent.response_from_chat_GPT_with_chain_of_reasoning(
+            analysis_depth=load_config()["analysis_depth"], user_message=question, images=[], preserve_user_messages_post_analysis=True, debug_reasoning_print=True)
 
         if response is not None:
             self.chats[self.current_chat][-1].answer += response
