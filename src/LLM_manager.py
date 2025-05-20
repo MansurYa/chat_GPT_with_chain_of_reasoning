@@ -18,12 +18,12 @@ import sys
 import logging
 import traceback
 
-from debug_tracer import DebugTracer
-from utils import load_prompts
-from messages_meta_data_manager import MessagesWithMetaData
+from .debug_tracer import DebugTracer
+from .utils import load_prompts
+from .messages_meta_data_manager import MessagesWithMetaData
 
 
-from message_manager import MessageContext
+from .message_manager import MessageContext
 
 
 class DeepSeekRouterError(Exception):
@@ -561,7 +561,8 @@ f```
 
             # Формирование параметров запроса
             request_parameters = {
-                "model": model_name,
+#                "model": model_name,
+                "model": "meta-llama/llama-4-maverick",
                 "messages": converted_messages,
                 "max_tokens": self.max_response_tokens,
                 "temperature": self.temperature,

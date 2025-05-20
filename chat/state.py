@@ -1,7 +1,7 @@
 import os
 import json
 import reflex as rx
-from src.LLM_manager import ChatGPTAgent
+from src.LLM_manager import ChatLLMAgent
 
 
 class QA(rx.Base):
@@ -56,21 +56,21 @@ class State(rx.State):
     # The name of the new chat.
     new_chat_name: str = ""
 
-    def get_chat_agent(self) -> ChatGPTAgent:
-        """Creates an instance of ChatGPTAgent."""
-        return ChatGPTAgent(
-            api_key=self.config["api_key"],
-            organization=self.config["organization"],
+    def get_chat_agent(self) -> ChatLLMAgent:
+        """Creates an instance of ChatLLMAgent."""
+        return ChatLLMAgent(
             model_name=self.config["model_name"],
             mode=2,
             task_prompt="""You are "ChatGPT with chain of reasoning" (If they ask, then give them your full name and chain of reasoning can be translated into the user's language). This enhanced version of ChatGPT applies a step-by-step chain-of-reasoning method before each response. While this increases response time, it significantly boosts the quality of answers, allowing the chatbot to tackle much more complex tasks.
-Instruction: When answering my questions, always use a step-by-step reasoning approach to fully understand, analyze, and provide an accurate answer.
-Chain of reasoning reasoning or step-by-step is a method where you break down each question, asking yourself smaller, clarifying questions and answering them sequentially. This ensures a correct, well-verified final answer with zero errors. First, outline the questions that need to be addressed, then proceed to answer them. Use this method consistently to avoid providing inaccurate information, write error-free code, and identify any bugs in the code, if present.
-If you're asked to translate text, focus on conveying the intended meaning rather than providing a literal translation. The translation should be professionally oriented, accessible to a technically savvy reader, and preserve complex constructions when they hold important meaning. For technical texts, if professional terms appear in English, keep them in English; if a Russian equivalent exists, include it in parentheses before the English term. You are highly experienced in IT, enabling you to translate advanced technical materials, particularly those related to databases and distributed computing.
-If the questions are in advanced mathematics, imagine you are a professor in mathematical analysis. Guide through topics step-by-step with strict mathematical precision, providing examples and detailed explanations. Anticipate possible mistakes to help prevent misinterpretations, and clarify each statement to ensure it is both accessible and mathematically rigorous.
-The final answer is always given in the user's language.
-If they do not ask otherwise, then give answers using MarkDown markup.
-""",
+    Instruction: When answering my questions, always use a step-by-step reasoning approach to fully understand, analyze, and provide an accurate answer.
+    Chain of reasoning reasoning or step-by-step is a method where you break down each question, asking yourself smaller, clarifying questions and answering them sequentially. This ensures a correct, well-verified final answer with zero errors. First, outline the questions that need to be addressed, then proceed to answer them. Use this method consistently to avoid providing inaccurate information, write error-free code, and identify any bugs in the code, if present.
+    If you're asked to translate text, focus on conveying the intended meaning rather than providing a literal translation. The translation should be professionally oriented, accessible to a technically savvy reader, and preserve complex constructions when they hold important meaning. For technical texts, if professional terms appear in English, keep them in English; if a Russian equivalent exists, include it in parentheses before the English term. You are highly experienced in IT, enabling you to translate advanced technical materials, particularly those related to databases and distributed computing.
+    If the questions are in advanced mathematics, imagine you are a professor in mathematical analysis. Guide through topics step-by-step with strict mathematical precision, providing examples and detailed explanations. Anticipate possible mistakes to help prevent misinterpretations, and clarify each statement to ensure it is both accessible and mathematically rigorous.
+    The final answer is always given in the user's language.
+    If they do not ask otherwise, then give answers using MarkDown markup.
+    """,
+            openrouter_api_key=self.config["api_key"],  # Используем api_key как openrouter_api_key
+            use_openai_or_openrouter="openrouter",  # Указываем провайдера
             max_total_tokens=self.config["max_total_tokens"],
             max_response_tokens=self.config["max_response_tokens"],
             temperature=self.config["temperature"]
@@ -123,7 +123,7 @@ If they do not ask otherwise, then give answers using MarkDown markup.
         """Get the response from the API.
 
         Args:
-            form_data: A dict with the current question.
+            question: The question to process.
         """
         # Add the question to the list of questions.
         qa = QA(question=question, answer="")
@@ -140,10 +140,14 @@ If they do not ask otherwise, then give answers using MarkDown markup.
             if qa.answer != "":
                 agent.context.add_assistant_message(qa.answer)
 
-        # response = agent.response_from_chat_GPT_with_chain_of_reasoning(analysis_depth=self.config["analysis_depth"], user_message=question, images=[], preserve_user_messages_post_analysis=True)
-        # Replaced it so that the 'analysis_depth' could be changed right during operation
-        response = agent.response_from_chat_GPT_with_chain_of_reasoning(
-            analysis_depth=load_config()["analysis_depth"], user_message=question, images=[], preserve_user_messages_post_analysis=True, debug_reasoning_print=True)
+        # Исправляем имя метода
+        response = agent.response_from_LLM_with_decomposition(
+            analysis_depth=self.config["analysis_depth"],
+            user_message=question,
+            images=[],
+            preserve_user_messages_post_analysis=True,
+            debug_reasoning_print=True
+        )
 
         if response is not None:
             self.chats[self.current_chat][-1].answer += response

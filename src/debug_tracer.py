@@ -7,8 +7,8 @@ import textwrap
 from typing import Optional, Dict, Any, List, Union, Tuple
 import tempfile
 
-from utils import TaskCounter
-from messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
+from .utils import TaskCounter
+from .messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
 
 
 class DebugTracer:
