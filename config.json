@@ -1,13 +1,9 @@
 {
-    "openai_api_key": "",
-    "openai_organization": "",
-    "openrouter_api_key": "",
+    "api_key": "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",
+    "organization": "",
     "model_name": "deepseek/deepseek-chat-v3-0324",
-    "larger_model_name": "deepseek/deepseek-r1",
     "temperature": 0.0,
     "max_response_tokens": 4095,
     "max_total_tokens": 120000,
-    "analysis_depth": 5,
-    "max_llm_calling_count": 100,
-    "use_openai_or_openrouter": "openrouter"
+    "analysis_depth": 5
 }

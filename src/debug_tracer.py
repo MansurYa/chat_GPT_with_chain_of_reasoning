@@ -6,9 +6,11 @@ from rich.console import Console
 import textwrap
 from typing import Optional, Dict, Any, List, Union, Tuple
 import tempfile
+import sys
+import os
 
-from utils import TaskCounter
-from messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
+from src.utils import TaskCounter
+from src.messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
 
 
 class DebugTracer:

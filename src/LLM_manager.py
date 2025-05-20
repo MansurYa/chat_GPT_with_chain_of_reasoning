@@ -18,13 +18,10 @@ import sys
 import logging
 import traceback
 
-from debug_tracer import DebugTracer
-from utils import load_prompts
-from messages_meta_data_manager import MessagesWithMetaData
-
-
-from message_manager import MessageContext
-
+from src.debug_tracer import DebugTracer
+from src.utils import load_prompts
+from src.messages_meta_data_manager import MessagesWithMetaData
+from src.message_manager import MessageContext
 
 class DeepSeekRouterError(Exception):
     """Пользовательский класс ошибки для обработки пустых ответов от OpenRouter API"""
