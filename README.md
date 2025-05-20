@@ -127,7 +127,7 @@ LARGER_MODEL_NAME = config.get("larger_model_name", MODEL_NAME)
 # Замечание: исследования показывают, что не следует даже в MODEL_NAME использовать модель
 # с менее чем 100 миллиардами параметров (LARGER_MODEL_NAME >= MODEL_NAME > 100B params)
 
-agent = ChatLLMAgent(
+agent_IoT = ChatLLMAgent(
     model_name=MODEL_NAME,
     openai_api_key=OPENAI_API_KEY,
     openai_organization=OPENAI_ORGANIZATION,
@@ -142,25 +142,24 @@ agent = ChatLLMAgent(
     temperature=TEMPERATURE
 )
 
+# Разделяем контексты через отдельных агентов
+agent_HRD = agent_IoT.clone()
+
 # user_prompt = "Сколько будет 2+2?"
 user_prompt = "Вычислить $\lim_{n \to \infty} \sin \frac{\pi}{n} \sum_{k=1}^{n} \frac{1}{2 + \cos \frac{\pi k}{n}}$."
-# user_prompt = """Найти
-# ∬∬ₓ²+ᵧ²+₂²<₁ xᵐyⁿzᵖ dx dy dz,
-# где m, n и p — целые неотрицательные числа.
-# """
 # user_prompt = "В круге радиусом 5 хорды \(AB\) и \(CD\) пересекаются в точке \(E\). Если точка \(B\) лежит на малой дуге \(AD\), \(BC = 6\), и \(AD\) — единственная хорда, начинающаяся в \(A\), которая пересекается пополам линией \(BC\), найдите синус центрального угла малой дуги \(AB\), выраженный в виде \(m/n\) в несократимом виде, и вычислите \(mn\).    "
-# user_prompt = "Пусть $N$ обозначает количество упорядоченных троек натуральных чисел $(a, b, c)$, таких, что $a, b, c \ leq 3 ^ 6$ и $ a ^3 + b ^ 3 + c^ 3$ кратно $3^7$. Найдите остаток, если $N$ разделить на $1000$."
+# user_prompt = "$9$ членов бейсбольной команды пошли в кафе-мороженое после своей игры. Каждый игрок взял по одному рожку мороженого с шоколадным, ванильным или клубничным вкусом. По крайней мере один игрок выбрал каждый из вкусов, причем количество игроков, выбравших шоколадное мороженое, было больше, чем количество выбравших ванильное, которое в свою очередь было больше, чем количество выбравших клубничное. Пусть $N$ — число различных вариантов распределения вкусов между игроками, удовлетворяющих этим условиям. Найдите остаток от деления $N$ на $1000$."
 
-response = agent.response_from_LLM(
+response = agent_IoT.response_from_LLM(
     user_message=user_prompt,
     images=[],
 )
 
-print("Ответ бота БЕЗ рекурсивной декомпозиции:")
+print("Ответ бота БЕЗ иерархической рекурсивной декомпозиции:")
 print(response)
 
 
-response = agent.response_from_LLM_with_hierarchical_recursive_decomposition(
+response = agent_HRD.response_from_LLM_with_hierarchical_recursive_decomposition(
     user_message=user_prompt,
     images=[],
     model_name=MODEL_NAME,  # Используется для более простых целей (можно указать чуть более слабую модель)
@@ -170,7 +169,7 @@ response = agent.response_from_LLM_with_hierarchical_recursive_decomposition(
     debug_reasoning_print=True
 )
 
-print("Ответ бота С рекурсивной декомпозицией:")
+print("Ответ бота С иерархической рекурсивной декомпозицией:")
 print(response)
 ```
 
