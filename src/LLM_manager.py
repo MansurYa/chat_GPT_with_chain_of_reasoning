@@ -18,10 +18,20 @@ import sys
 import logging
 import traceback
 
+<<<<<<< HEAD
 from src.debug_tracer import DebugTracer
 from src.utils import load_prompts
 from src.messages_meta_data_manager import MessagesWithMetaData
 from src.message_manager import MessageContext
+=======
+from .debug_tracer import DebugTracer
+from .utils import load_prompts
+from .messages_meta_data_manager import MessagesWithMetaData
+
+
+from .message_manager import MessageContext
+
+>>>>>>> 9b86492a921bdbc53d91ce090f848113d7925862
 
 class DeepSeekRouterError(Exception):
     """Пользовательский класс ошибки для обработки пустых ответов от OpenRouter API"""
@@ -558,7 +568,8 @@ f```
 
             # Формирование параметров запроса
             request_parameters = {
-                "model": model_name,
+#                "model": model_name,
+                "model": "meta-llama/llama-4-maverick",
                 "messages": converted_messages,
                 "max_tokens": self.max_response_tokens,
                 "temperature": self.temperature,
