@@ -3,6 +3,7 @@ from chat.components import chat, navbar, action_bar
 from reflex_chakra import box, flex, button, vstack, text
 from chat.state import State
 
+
 def index() -> rx.Component:
     """Основное приложение."""
     return box(

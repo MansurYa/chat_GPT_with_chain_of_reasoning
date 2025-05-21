@@ -28,7 +28,19 @@ def load_config():
         except json.JSONDecodeError as e:
             raise ValueError(f"Error parsing JSON in {config_path}: {e}")
 
-    required_keys = ["api_key", "organization", "model_name", "temperature", "max_response_tokens", "max_total_tokens", "analysis_depth"]
+    required_keys = [
+        "openai_api_key",
+        "openai_organization",
+        "openrouter_api_key",
+        "model_name",
+        "larger_model_name",
+        "temperature",
+        "max_response_tokens",
+        "max_total_tokens",
+        "analysis_depth",
+        "max_llm_calling_count",
+        "use_openai_or_openrouter"
+    ]
     missing_keys = [key for key in required_keys if key not in config]
     if missing_keys:
         raise KeyError(f"Missing required config parameters: {', '.join(missing_keys)}")
@@ -60,21 +72,16 @@ class State(rx.State):
         """Creates an instance of ChatLLMAgent."""
         return ChatLLMAgent(
             model_name=self.config["model_name"],
+            openai_api_key=self.config["openai_api_key"],
+            openai_organization=self.config["openai_organization"],
+            openrouter_api_key=self.config["openrouter_api_key"],
+            use_openai_or_openrouter=self.config["use_openai_or_openrouter"],
             mode=2,
-            task_prompt="""You are "ChatGPT with chain of reasoning" (If they ask, then give them your full name and chain of reasoning can be translated into the user's language). This enhanced version of ChatGPT applies a step-by-step chain-of-reasoning method before each response. While this increases response time, it significantly boosts the quality of answers, allowing the chatbot to tackle much more complex tasks.
-    Instruction: When answering my questions, always use a step-by-step reasoning approach to fully understand, analyze, and provide an accurate answer.
-    Chain of reasoning reasoning or step-by-step is a method where you break down each question, asking yourself smaller, clarifying questions and answering them sequentially. This ensures a correct, well-verified final answer with zero errors. First, outline the questions that need to be addressed, then proceed to answer them. Use this method consistently to avoid providing inaccurate information, write error-free code, and identify any bugs in the code, if present.
-    If you're asked to translate text, focus on conveying the intended meaning rather than providing a literal translation. The translation should be professionally oriented, accessible to a technically savvy reader, and preserve complex constructions when they hold important meaning. For technical texts, if professional terms appear in English, keep them in English; if a Russian equivalent exists, include it in parentheses before the English term. You are highly experienced in IT, enabling you to translate advanced technical materials, particularly those related to databases and distributed computing.
-    If the questions are in advanced mathematics, imagine you are a professor in mathematical analysis. Guide through topics step-by-step with strict mathematical precision, providing examples and detailed explanations. Anticipate possible mistakes to help prevent misinterpretations, and clarify each statement to ensure it is both accessible and mathematically rigorous.
-    The final answer is always given in the user's language.
-    If they do not ask otherwise, then give answers using MarkDown markup.
-    """,
-            openrouter_api_key=self.config["api_key"],  # Используем api_key как openrouter_api_key
-            use_openai_or_openrouter="openrouter",  # Указываем провайдера
+            task_prompt="",
             max_total_tokens=self.config["max_total_tokens"],
             max_response_tokens=self.config["max_response_tokens"],
             temperature=self.config["temperature"]
-        )
+)
 
     def create_chat(self):
         """Create a new chat."""
@@ -140,11 +147,17 @@ class State(rx.State):
             if qa.answer != "":
                 agent.context.add_assistant_message(qa.answer)
 
-        # Исправляем имя метода
-        response = agent.response_from_LLM_with_decomposition(
-            analysis_depth=self.config["analysis_depth"],
+        # response = agent.response_from_LLM(
+        #     user_message=question,
+        #     images=[],
+        # )
+
+        response = agent.response_from_LLM_with_hierarchical_recursive_decomposition(
             user_message=question,
             images=[],
+            # model_name=MODEL_NAME,
+            # larger_model_name=LARGER_MODEL_NAME,
+            max_llm_calling_count=self.config["max_llm_calling_count"],
             preserve_user_messages_post_analysis=True,
             debug_reasoning_print=True
         )

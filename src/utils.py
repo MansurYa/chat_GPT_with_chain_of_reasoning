@@ -1,18 +1,38 @@
 from typing import List, Dict, Tuple
 import copy
-import os
-import logging
 
 
-def load_prompts(base_path: str = "..", prompt_types: list = None) -> Tuple[Dict[str, str], Dict[str, str]]:
+def load_prompts(base_path: str = None, prompt_types: list = None) -> Tuple[Dict[str, str], Dict[str, str]]:
     """
     Загружает полные и сокращенные версии промптов из соответствующих директорий.
 
-    :param base_path: Базовый путь к директориям промптов
+    :param base_path: Базовый путь к директориям промптов (определяется автоматически, если не указан)
     :param prompt_types: Список типов промптов для загрузки (если None, загружаются все)
     :return: Кортеж из двух словарей: 1) полные промпты, 2) сокращенные промпты
     """
-    # Стандартный список промптов, если не указан другой
+    import os
+    import logging
+
+    if base_path is None:
+        module_dir = os.path.dirname(os.path.abspath(__file__))
+
+        potential_paths = [
+            "",                          # Текущая директория
+            "..",                        # Родительская директория
+            module_dir,                  # Директория модуля
+            os.path.join(module_dir, "..")  # Родительская директория модуля
+        ]
+
+        for path in potential_paths:
+            prompts_dir = os.path.join(path, "prompts")
+            if os.path.isdir(prompts_dir):
+                base_path = path
+                logging.info(f"Найдена директория промптов: {prompts_dir}")
+                break
+        else:
+            base_path = ""
+            logging.warning("Директория 'prompts' не найдена. Используется текущая директория.")
+
     if prompt_types is None:
         prompt_types = [
             "main_recursive_decomposition_prompt",
@@ -29,17 +49,13 @@ def load_prompts(base_path: str = "..", prompt_types: list = None) -> Tuple[Dict
             "finish_task_after_solving_subtasks_prompt"
         ]
 
-    # Пути к директориям
     full_prompts_dir = os.path.join(base_path, "prompts")
     shortened_prompts_dir = os.path.join(base_path, "shortened_prompts")
 
-    # Словари для хранения промптов
     full_prompts = {}
     shortened_prompts = {}
 
-    # Загрузка промптов
     for prompt_type in prompt_types:
-        # Полные промпты
         full_prompt_path = os.path.join(full_prompts_dir, f"{prompt_type}.txt")
         try:
             with open(full_prompt_path, "r", encoding="utf-8") as f:
@@ -48,7 +64,6 @@ def load_prompts(base_path: str = "..", prompt_types: list = None) -> Tuple[Dict
             logging.warning(f"Полный промпт не найден: {full_prompt_path}")
             full_prompts[prompt_type] = ""
 
-        # Сокращенные промпты
         shortened_prompt_path = os.path.join(shortened_prompts_dir, f"{prompt_type}_shortened.txt")
         try:
             with open(shortened_prompt_path, "r", encoding="utf-8") as f:

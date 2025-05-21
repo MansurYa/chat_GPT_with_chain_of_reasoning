@@ -1,4 +1,3 @@
-import os
 import json
 import traceback
 from datetime import datetime
@@ -6,16 +5,10 @@ from rich.console import Console
 import textwrap
 from typing import Optional, Dict, Any, List, Union, Tuple
 import tempfile
-import sys
 import os
 
-<<<<<<< HEAD
 from src.utils import TaskCounter
 from src.messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
-=======
-from .utils import TaskCounter
-from .messages_meta_data_manager import MessagesWithMetaData, MessageMetaData
->>>>>>> 9b86492a921bdbc53d91ce090f848113d7925862
 
 
 class DebugTracer:
