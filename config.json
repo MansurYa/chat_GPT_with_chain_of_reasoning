@@ -1,13 +1,25 @@
 {
+<<<<<<< HEAD
+    "api_key": "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",
+    "organization": "",
+    "model_name": "deepseek/deepseek-chat-v3-0324",
+    "temperature": 0.0,
+    "max_response_tokens": 4095,
+    "max_total_tokens": 120000,
+    "analysis_depth": 5
+=======
+    "api_key": "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",
+    "organization": "",
     "openai_api_key": "",
     "openai_organization": "",
-    "openrouter_api_key": "",
-    "model_name": "deepseek/deepseek-chat-v3-0324",
-    "larger_model_name": "deepseek/deepseek-r1",
+    "openrouter_api_key": "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",
+    "model_name": "meta-llama/llama-4-maverick",
+    "larger_model_name": "",
     "temperature": 0.0,
     "max_response_tokens": 4095,
     "max_total_tokens": 120000,
     "analysis_depth": 5,
     "max_llm_calling_count": 100,
     "use_openai_or_openrouter": "openrouter"
+>>>>>>> 9b86492a921bdbc53d91ce090f848113d7925862
 }

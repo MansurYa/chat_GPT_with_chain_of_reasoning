@@ -1,14 +1,22 @@
 from typing import List, Dict
 import copy
 import re
-from utils import TaskCounter, dedent_text
+<<<<<<< HEAD
+from src.utils import TaskCounter, dedent_text
+=======
+from .utils import TaskCounter, dedent_text
+>>>>>>> 9b86492a921bdbc53d91ce090f848113d7925862
 
 from typing import Optional
 import logging
 import traceback
 
 # from debug_tracer import DebugTracer
-from utils import add_indent
+<<<<<<< HEAD
+from src.utils import add_indent
+=======
+from .utils import add_indent
+>>>>>>> 9b86492a921bdbc53d91ce090f848113d7925862
 
 
 class MessageMetaData:

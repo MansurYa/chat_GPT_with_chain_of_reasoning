@@ -29,3 +29,5 @@ typing-inspection==0.4.0
 typing_extensions==4.13.1
 urllib3==2.3.0
 utils==1.0.2
+
+reflex==0.7.6
