@@ -699,22 +699,38 @@ f```
 
     def _process_image(self, image_url: str) -> dict:
         """
-        Обработка и валидация изображений
+        Обработка и валидация изображений с улучшенной логикой для локальных файлов.
 
         :param image_url: URL изображения или путь к файлу
         :return: Обработанное представление изображения
         """
-        if self._is_local_file(image_url):
-            return {
-                "type": "image_url",
-                "image_url": {
-                    "url": self._local_image_to_base64(image_url),
-                    "detail": "auto"
-                }
-            }
+        # Сначала проверяем, выглядит ли это как локальный путь
+        if self._is_local_path(image_url):
+            # Проверяем существование файла
+            if not self._is_local_file_exists(image_url):
+                raise FileNotFoundError(
+                    f"Локальный файл изображения не найден или недоступен: {image_url}. "
+                    f"Убедитесь, что файл существует и у вас есть права на его чтение."
+                )
 
+            # Конвертируем локальный файл в base64
+            try:
+                return {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": self._local_image_to_base64(image_url),
+                        "detail": "auto"
+                    }
+                }
+            except Exception as e:
+                raise ValueError(f"Ошибка при конвертации локального изображения в base64: {str(e)}")
+
+        # Если это не локальный путь, проверяем как URL
         if not self._is_valid_image_url(image_url):
-            raise ValueError(f"Недопустимый URL изображения: {image_url}")
+            raise ValueError(
+                f"Недопустимый URL изображения: {image_url}. "
+                f"URL должен начинаться с http:// или https:// и указывать на изображение."
+            )
 
         return {
             "type": "image_url",
@@ -724,61 +740,153 @@ f```
             }
         }
 
-    def _is_local_file(self, path: str) -> bool:
+    def _is_local_path(self, path: str) -> bool:
         """
-        Проверяет, является ли путь локальным файлом
+        Проверяет, выглядит ли строка как локальный путь к файлу.
 
-        :param path: Путь для проверки
-        :return: True, если это локальный файл
+        :param path: Строка для проверки
+        :return: True, если строка выглядит как локальный путь
         """
-        return os.path.isfile(path)
+        # Проверяем различные форматы локальных путей
+        local_path_indicators = [
+            '/',           # Unix абсолютные пути
+            './',          # Относительные пути
+            '../',         # Родительские директории
+            '~/',          # Домашняя директория
+        ]
+
+        # Windows пути
+        if len(path) >= 3 and path[1:3] == ':\\':  # C:\, D:\, etc.
+            return True
+
+        # Unix/Linux/Mac пути
+        for indicator in local_path_indicators:
+            if path.startswith(indicator):
+                return True
+
+        # Проверяем, содержит ли путь специфичные для файловой системы символы
+        # но не содержит схемы протокола
+        if not path.startswith(('http://', 'https://', 'ftp://', 'data:')):
+            # Если содержит символы пути и точку (расширение файла)
+            if ('/' in path or '\\' in path) and '.' in path:
+                return True
+
+        return False
+
+    def _is_local_file_exists(self, path: str) -> bool:
+        """
+        Проверяет, существует ли локальный файл.
+
+        :param path: Путь к файлу
+        :return: True, если файл существует и доступен
+        """
+        try:
+            return os.path.isfile(path) and os.access(path, os.R_OK)
+        except (OSError, TypeError):
+            return False
 
     def _local_image_to_base64(self, file_path: str) -> str:
         """
-        Конвертация локального файла в base64
+        Конвертация локального файла в base64 с улучшенной обработкой ошибок.
 
         :param file_path: Путь к файлу изображения
         :return: Строка в формате Data URL (data:mime/type;base64,...)
         """
         try:
+            # Проверяем размер файла перед чтением
+            file_size = os.path.getsize(file_path)
+            max_size = 20 * 1024 * 1024  # 20MB лимит
+
+            if file_size > max_size:
+                raise ValueError(f"Размер файла ({file_size} bytes) превышает максимально допустимый ({max_size} bytes)")
+
             with open(file_path, "rb") as image_file:
                 encoded = base64.b64encode(image_file.read()).decode('utf-8')
                 mime_type = self._get_mime_type(file_path)
                 return f"data:{mime_type};base64,{encoded}"
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Файл изображения не найден: {file_path}")
+        except PermissionError:
+            raise PermissionError(f"Нет прав доступа к файлу: {file_path}")
+        except OSError as e:
+            raise OSError(f"Ошибка при чтении файла {file_path}: {str(e)}")
         except Exception as e:
-            raise ValueError(f"Ошибка кодирования изображения: {str(e)}")
+            raise ValueError(f"Ошибка кодирования изображения {file_path}: {str(e)}")
 
     def _get_mime_type(self, file_path: str) -> str:
         """
-        Определяет MIME-тип файла по расширению
+        Определяет MIME-тип файла по расширению с улучшенной поддержкой форматов.
 
         :param file_path: Путь к файлу
         :return: MIME-тип файла
         """
         ext = os.path.splitext(file_path)[1].lower()
-        return {
+        mime_types = {
             '.jpg': 'image/jpeg',
             '.jpeg': 'image/jpeg',
             '.png': 'image/png',
             '.gif': 'image/gif',
-            '.webp': 'image/webp'
-        }.get(ext, 'application/octet-stream')
+            '.webp': 'image/webp',
+            '.bmp': 'image/bmp',
+            '.tiff': 'image/tiff',
+            '.tif': 'image/tiff',
+            '.svg': 'image/svg+xml'
+        }
+
+        mime_type = mime_types.get(ext)
+        if not mime_type:
+            raise ValueError(
+                f"Неподдерживаемый формат изображения: {ext}. "
+                f"Поддерживаемые форматы: {', '.join(mime_types.keys())}"
+            )
+
+        return mime_type
 
     def _is_valid_image_url(self, url: str) -> bool:
         """
-        Валидация URL изображения
+        Валидация URL изображения с поддержкой data URLs и обычных HTTP URLs.
 
-        :param url: URL для проверки
-        :return: True, если URL валиден и ведет к изображению
+        :param url: URL для проверки (может быть http/https URL или data URL)
+        :return: True, если URL валиден
         """
         try:
+            # Проверяем data URLs (data:image/...;base64,...)
+            if url.startswith('data:'):
+                # Проверяем формат data URL для изображений
+                if url.startswith('data:image/'):
+                    # Проверяем наличие base64 части
+                    if ';base64,' in url:
+                        # Получаем MIME тип
+                        mime_part = url.split(';')[0].replace('data:', '')
+                        # Список поддерживаемых MIME типов
+                        valid_mime_types = [
+                            'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
+                            'image/webp', 'image/bmp', 'image/tiff', 'image/svg+xml'
+                        ]
+                        return mime_part in valid_mime_types
+                return False
+
+            # Проверяем обычные HTTP/HTTPS URLs
             if not url.startswith(('http://', 'https://')):
                 return False
 
-            resp = requests.head(url, timeout=5, allow_redirects=True)
-            return resp.status_code == 200 and resp.headers.get('Content-Type', '').startswith('image/')
+            # Выполняем HEAD запрос с таймаутом для HTTP URLs
+            resp = requests.head(url, timeout=10, allow_redirects=True)
+
+            # Проверяем статус код
+            if resp.status_code != 200:
+                return False
+
+            # Проверяем Content-Type
+            content_type = resp.headers.get('Content-Type', '').lower()
+            return content_type.startswith('image/')
 
         except requests.RequestException:
+            # Любые сетевые ошибки считаем невалидным URL
+            return False
+        except Exception:
+            # Любые другие ошибки тоже считаем невалидным URL
             return False
 
     def response_from_LLM_with_hierarchical_recursive_decomposition(
@@ -1659,8 +1767,8 @@ f```
         # Проверяем существование файлов промптов
         try:
             # Загружаем все промпты
-            if not os.path.exists(os.path.join("..", "prompts")):
-                raise FileNotFoundError(f"Директория с промптами не найдена: {os.path.join('..', 'prompts')}")
+            # if not os.path.exists(os.path.join("..", "prompts")):
+            #     raise FileNotFoundError(f"Директория с промптами не найдена: {os.path.join('..', 'prompts')}")
 
             # Проверяем наличие ключевых промптов
             if not main_recursive_decomposition_prompt:
